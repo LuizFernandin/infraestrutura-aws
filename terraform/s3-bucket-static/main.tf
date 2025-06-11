@@ -14,6 +14,4 @@ resource "aws_s3_bucket" "static_site_bucket" {
         Name = "Static Site Bucket"
         Environment = "Production"
     }
-
-
 }

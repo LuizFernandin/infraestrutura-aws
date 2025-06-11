@@ -5,6 +5,6 @@ variable "region" {
 }
 
 variable "bucket_name" {
-  description = "Nome do bucket S3"
+  description = "WEB-STATIC"
   type        = string
 }
