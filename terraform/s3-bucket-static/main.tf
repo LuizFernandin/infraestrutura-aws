@@ -10,8 +10,8 @@ resource "aws_s3_bucket" "static_site_bucket" {
         error_document = "404.html"
     }
 
-    tags = {
-        Name = "Static Site Bucket"
-        Environment = "Production"
-    }
+    @REM tags = {
+    @REM     Name = "Static Site Bucket"
+    @REM     Environment = "Production"
+    @REM }
 }
