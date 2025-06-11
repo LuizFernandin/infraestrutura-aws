@@ -1,9 +1,8 @@
 name: Create S3 Static Site
 
 on:
-  issues:
-    type:
-      -opened
+  push:
+    branches: [ "main" ]
 
 jobs:
   deploy:
