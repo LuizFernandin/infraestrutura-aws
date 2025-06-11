@@ -24,6 +24,9 @@ jobs:
           export BUCKET_NAME="${{ github.event.issue.title }}"
           echo "Bucket Name: $BUCKET_NAME"
           echo "BUCKET_NAME=$BUCKET_NAME" >> $GITHUB_ENV
+      
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@v3
 
       - name: Run Terraform
         run: |
