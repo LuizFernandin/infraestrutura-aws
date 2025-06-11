@@ -1,8 +1,8 @@
 name: Create S3 Static Site
 
 on:
-  push:
-    branches: [ "main" ]
+  issues:
+    types: [opened]
 
 jobs:
   deploy:
@@ -13,27 +13,29 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up AWS CLI
-        uses: aws-actions/configure-aws-credencials@v2
+        uses: aws-actions/configure-aws-credentials@v2
         with:
-          aws-acess-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secret.AWS_SECRET_ACCESS_KEY }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
 
       - name: Extract Bucket Name from Issue
-        run:
-          export BUKET_NAME=$(echo "${{ github.event.issue.title }}")
+        run: |
+          export BUCKET_NAME="${{ github.event.issue.title }}"
           echo "Bucket Name: $BUCKET_NAME"
           echo "BUCKET_NAME=$BUCKET_NAME" >> $GITHUB_ENV
 
       - name: Run Terraform
-        run:
-          cd Terraform
-          cd s3-bucket-static
+        run: |
+          cd Terraform/s3-bucket-static
           terraform init
           terraform apply -auto-approve -var="bucket_name=${{ env.BUCKET_NAME }}"
 
+      - name: Install GitHub CLI
+        run: sudo apt-get install gh -y
+
       - name: Add comment
-        run: gh issue comment "$NUMBER" --repo "$REPO"  --body "$BODY"
+        run: gh issue comment "$NUMBER" --repo "$REPO" --body "$BODY"
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           NUMBER: ${{ github.event.issue.number }}
