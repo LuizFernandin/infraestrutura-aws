@@ -6,7 +6,7 @@ on:
 
 jobs:
   trigger_step_function:
-    if: startsWith(github.event.issue.title, 's3:')
+    if: startsWith(github.event.issue.title, 's3_')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
