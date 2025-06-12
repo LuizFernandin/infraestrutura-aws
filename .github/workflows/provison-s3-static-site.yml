@@ -7,43 +7,41 @@ on:
 jobs:
   trigger_step_function:
     if: startsWith(github.event.issue.title, 's3:')
-    deploy:
-      runs-on: ubuntu-latest
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      steps:
-        - name: Checkout
-          uses: actions/checkout@v4
+      - name: Set up AWS CLI
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
 
-        - name: Set up AWS CLI
-          uses: aws-actions/configure-aws-credentials@v2
-          with:
-            aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-            aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-            aws-region: us-east-1
+      - name: Extract Bucket Name from Issue
+        run: |
+          export BUCKET_NAME="${{ github.event.issue.title }}"
+          echo "Bucket Name: $BUCKET_NAME"
+          echo "BUCKET_NAME=$BUCKET_NAME" >> $GITHUB_ENV
+      
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@v3
 
-        - name: Extract Bucket Name from Issue
-          run: |
-            export BUCKET_NAME="${{ github.event.issue.title }}"
-            echo "Bucket Name: $BUCKET_NAME"
-            echo "BUCKET_NAME=$BUCKET_NAME" >> $GITHUB_ENV
-        
-        - name: Install Terraform
-          uses: hashicorp/setup-terraform@v3
+      - name: Run Terraform
+        run: |
+          cd terraform/s3-bucket-static
+          terraform init
+          terraform apply -auto-approve -var="bucket_name=${{ env.BUCKET_NAME }}"
 
-        - name: Run Terraform
-          run: |
-            cd terraform/s3-bucket-static
-            terraform init
-            terraform apply -auto-approve -var="bucket_name=${{ env.BUCKET_NAME }}"
+      - name: Install GitHub CLI
+        run: sudo apt-get install gh -y
 
-        - name: Install GitHub CLI
-          run: sudo apt-get install gh -y
-
-        - name: Add comment
-          run: gh issue comment "$NUMBER" --repo "$REPO" --body "$BODY"
-          env:
-            GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-            NUMBER: ${{ github.event.issue.number }}
-            REPO: ${{ github.repository }}
-            BODY: >
-              O bucket S3 foi criado com sucesso! 🎉
+      - name: Add comment
+        run: gh issue comment "$NUMBER" --repo "$REPO" --body "$BODY"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          NUMBER: ${{ github.event.issue.number }}
+          REPO: ${{ github.repository }}
+          BODY: >
+            O bucket S3 foi criado com sucesso! 🎉
