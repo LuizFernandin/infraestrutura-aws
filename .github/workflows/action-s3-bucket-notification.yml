@@ -1,4 +1,4 @@
-name: Create S3 Static Site
+name: Create S3 Bucket Notification
 
 on:
   issues:
